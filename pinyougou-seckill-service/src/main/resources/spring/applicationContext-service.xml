@@ -10,9 +10,9 @@
 
     <dubbo:protocol name="dubbo" port="20890"></dubbo:protocol>
     
-	<dubbo:application name="pinyougou-cart-service"/>  
+	<dubbo:application name="pinyougou-seckill-service"/>  
     <dubbo:registry protocol="zookeeper" address="192.168.25.132" port="2181"/>
-    <dubbo:annotation package="com.pinyougou.cart.service.impl" />  
+    <dubbo:annotation package="com.pinyougou.seckill.service.impl" />  
    
    
 </beans>

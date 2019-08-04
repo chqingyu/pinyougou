@@ -1,6 +1,11 @@
 package com.pinyougou.seckill.service.impl;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+
 import com.alibaba.dubbo.config.annotation.Service;
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
@@ -22,6 +27,9 @@ public class SeckillGoodsServiceImpl implements SeckillGoodsService {
 
 	@Autowired
 	private TbSeckillGoodsMapper seckillGoodsMapper;
+	
+	@Autowired
+	private RedisTemplate redisTemplate;
 	
 	/**
 	 * 查询全部
@@ -108,5 +116,35 @@ public class SeckillGoodsServiceImpl implements SeckillGoodsService {
 		Page<TbSeckillGoods> page= (Page<TbSeckillGoods>)seckillGoodsMapper.selectByExample(example);		
 		return new PageResult(page.getTotal(), page.getResult());
 	}
+
+		@Override
+		public List<TbSeckillGoods> findList() {
+			
+			List<TbSeckillGoods> seckillGoodsList =  redisTemplate.boundHashOps("seckillGoods").values();
+			
+			if(seckillGoodsList==null || seckillGoodsList.size()==0){
+				
+				TbSeckillGoodsExample example = new TbSeckillGoodsExample();
+				Criteria criteria = example.createCriteria();
+				criteria.andStatusEqualTo("1");
+				criteria.andStockCountGreaterThan(0);
+				criteria.andStartTimeLessThanOrEqualTo(new Date()); // 开始日期小于等于当前日期
+				criteria.andEndTimeGreaterThanOrEqualTo(new Date()); // 截至日期大于等于当前日期
+				
+				seckillGoodsList = seckillGoodsMapper.selectByExample(example);
+				// 将列表数据装入缓存
+				for (TbSeckillGoods seckillGoods : seckillGoodsList) {
+					
+					redisTemplate.boundHashOps("seckillGoods").put(seckillGoods.getId(), seckillGoods);
+					
+				}
+				System.out.println("从数据库中读取数据装入缓存");
+			}else{
+				System.out.println("从缓存中读取数据");
+			}
+			
+		
+			return seckillGoodsList;
+		}
 	
 }
