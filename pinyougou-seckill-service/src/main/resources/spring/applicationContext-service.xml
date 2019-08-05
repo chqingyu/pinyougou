@@ -14,5 +14,9 @@
     <dubbo:registry protocol="zookeeper" address="192.168.25.132" port="2181"/>
     <dubbo:annotation package="com.pinyougou.seckill.service.impl" />  
    
+    <bean id="idWorker" class="util.IdWorker">
+   	<constructor-arg index="0" value="1"></constructor-arg>
+   	<constructor-arg index="1" value="0"></constructor-arg>
+   </bean>
    
 </beans>
